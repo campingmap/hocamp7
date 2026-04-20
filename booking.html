@@ -327,6 +327,7 @@
         <div class="opt" data-g="site" data-value="파랑새 방갈로 (25만원)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">파랑새 방갈로 <span style="font-size:12px;color:var(--ocean-deep);font-weight:700">25만원</span></span></div>
         <div class="opt" data-g="site" data-value="트리하우스 (28만원 노키즈)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">트리하우스 <span style="font-size:12px;color:var(--ocean-deep);font-weight:700">28만원</span> <span style="font-size:12px;color:var(--coral)">노키즈</span></span></div>
         <div class="opt" data-g="site" data-value="솔부엉이 (28만원)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">솔부엉이 <span style="font-size:12px;color:var(--ocean-deep);font-weight:700">28만원</span></span></div>
+        <div class="opt" data-g="site" data-value="백패킹 데크 사이트 (16만원)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">백패킹 데크 사이트 <span style="font-size:12px;color:var(--coral);font-weight:700">16만원 (-2만원 할인)</span></span></div>
       </div>
     </div>
 
@@ -589,7 +590,10 @@
       fee += 10000;
       feeLines.push('캠핑카/카라반/트레일러: +10,000원');
     }
-    if (site.indexOf('파랑새 방갈로') !== -1) {
+    if (site.indexOf('백패킹 데크 사이트') !== -1) {
+      fee -= 20000;
+      feeLines.push('백패킹 데크 사이트 할인: -20,000원');
+    } else if (site.indexOf('파랑새 방갈로') !== -1) {
       fee += 70000;
       feeLines.push('파랑새 방갈로: +70,000원');
     } else if (site.indexOf('트리하우스') !== -1 || site.indexOf('솔부엉이') !== -1) {
