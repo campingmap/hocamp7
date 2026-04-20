@@ -167,19 +167,20 @@
 
     <div class="field">
       <div class="field-label">거주지역 <span class="req">*</span></div>
-      <div class="opt-list" id="g-region">
-        <div class="opt" data-g="region" data-value="서울"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">서울</span></div>
-        <div class="opt" data-g="region" data-value="경기도 (인천)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">경기도 (인천)</span></div>
-        <div class="opt" data-g="region" data-value="강원도"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">강원도</span></div>
-        <div class="opt" data-g="region" data-value="충청남도 (대전, 세종)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">충청남도 (대전, 세종)</span></div>
-        <div class="opt" data-g="region" data-value="충청북도"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">충청북도</span></div>
-        <div class="opt" data-g="region" data-value="경상남도 (부산, 울산)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">경상남도 (부산, 울산)</span></div>
-        <div class="opt" data-g="region" data-value="경상북도 (대구)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">경상북도 (대구)</span></div>
-        <div class="opt" data-g="region" data-value="전라남도 (광주)"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">전라남도 (광주)</span></div>
-        <div class="opt" data-g="region" data-value="전라북도특별자치도"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">전라북도특별자치도</span></div>
-        <div class="opt" data-g="region" data-value="제주특별자치도"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">제주특별자치도</span></div>
-        <div class="opt" data-g="region" data-value="그외 지역 혹은 해외"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">그외 지역 혹은 해외</span></div>
-      </div>
+      <select id="regionSelect">
+        <option value="">선택해 주세요</option>
+        <option>서울</option>
+        <option>경기도 (인천)</option>
+        <option>강원도</option>
+        <option>충청남도 (대전, 세종)</option>
+        <option>충청북도</option>
+        <option>경상남도 (부산, 울산)</option>
+        <option>경상북도 (대구)</option>
+        <option>전라남도 (광주)</option>
+        <option>전라북도특별자치도</option>
+        <option>제주특별자치도</option>
+        <option>그외 지역 혹은 해외</option>
+      </select>
     </div>
 
     <div class="field">
@@ -465,7 +466,7 @@
     if (!phone)        { alert('연락처를 입력해 주세요.'); return; }
     if (!adult)        { alert('성인 인원을 선택해 주세요.'); return; }
     if (!child)        { alert('아동 인원을 선택해 주세요.'); return; }
-    if (!region)       { alert('거주지역을 선택해 주세요.'); return; }
+    if (!region)       { alert('거주지역을 선택해 주세요.'); return; }  // select
     if (!agree1)       { alert('개인정보 수집·이용 동의 여부를 선택해 주세요.'); return; }
     if (agree1 === '비동의') { alert('개인정보 수집에 동의하지 않으면 참가 신청이 불가합니다.'); return; }
     if (!guardianName) { alert('법정 대리인 본인 성명을 입력해 주세요. (아동 없으면 없음)'); return; }
