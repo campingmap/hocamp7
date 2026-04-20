@@ -149,7 +149,7 @@
 
     <div class="field">
       <div class="field-label">참여 인원 아동 (미성년자 자녀) <span class="req">*</span></div>
-      <div class="field-hint">기준인원은 성인 2명 아동 3명 (아동 1인 추가시 1만원의 비용이 추가됩니다.)</div>
+      <div class="field-hint">기준인원은 성인 2명 아동 3명 (아동 1인 추가시 2만원의 비용이 추가됩니다.)</div>
       <div class="opt-grid" id="g-child">
         <div class="opt" data-g="child" data-value="0명"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">0명</span></div>
         <div class="opt" data-g="child" data-value="1명"><span class="opt-circle"><span class="opt-dot"></span></span><span class="opt-text">1명</span></div>
@@ -161,7 +161,7 @@
 
     <div class="field">
       <div class="field-label">아이들 생년월일</div>
-      <div class="field-hint">관광지 입장료 계산에 필요합니다 (예시 2명인 경우 2019.05.01 / 2022.03.04 2명인 경우)</div>
+      <div class="field-hint">관광지 입장료 계산에 필요합니다 (예시 2명인 경우 2019.05.01 / 2022.03.04 )</div>
       <textarea id="childBirth" placeholder="내 답변"></textarea>
     </div>
 
@@ -331,7 +331,7 @@
     </div>
 
     <div class="field">
-      <div class="field-label">함께 신청하는 지인 일행이 있나요? <span class="req">*</span></div>
+      <div class="field-label">함께 신청하는 지인 일행이 있나요?</div>
       <div class="field-hint">지인 일행이 있는 경우 닉네임을 적어주세요</div>
       <input type="text" id="friendNick" placeholder="내 답변" />
     </div>
@@ -501,8 +501,7 @@
     if (!cafeNick)    { alert('네이버 카페 닉네임을 입력해 주세요.'); return; }
     if (!han)         { alert('희망하는 반을 선택해 주세요.'); return; }
     if (!site)        { alert('사이트 및 방갈로를 선택해 주세요.'); return; }
-    if (!friendNick)  { alert('지인 일행 정보를 입력해 주세요. (없으면 없음)'); return; }
-    if (!arrivalTime) { alert('도착 예정 시간을 입력해 주세요.'); return; }
+        if (!arrivalTime) { alert('도착 예정 시간을 입력해 주세요.'); return; }
     if (!filming)     { alert('촬영 동의 여부를 선택해 주세요.'); return; }
     if (filming === '비동의') { alert('촬영에 동의하지 않으면 참가가 불가합니다.'); return; }
 
@@ -578,9 +577,9 @@
     }
     var childNum = parseInt(p1data.child);
     if (childNum >= 4) {
-      var childExtra = (childNum - 3) * 10000;
+      var childExtra = (childNum - 3) * 20000;
       fee += childExtra;
-      feeLines.push('아동 추가 ' + (childNum - 3) + '명: +' + childExtra.toLocaleString() + '원');
+      feeLines.push('아동 추가 ' + (childNum - 3) + '명: +' + childExtra.toLocaleString() + '원 (1인 2만원)');
     }
     if (vehicleSel.indexOf('차량 추가 1대 (1만원 추가)') !== -1) {
       fee += 10000;
