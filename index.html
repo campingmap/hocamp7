@@ -829,7 +829,7 @@
       <div class="timeline-item">
         <div class="timeline-time">21:00~22:00</div>
         <div class="timeline-place">캠핑장</div>
-        <div class="timeline-desc"><strong>천체 관측 체험</strong><br>전문가와 함께하는 천체 관측 체험. (우천 시 2일차로 변경)</div>
+        <div class="timeline-desc"><strong>천체 관측 체험</strong><br>천체관측 유튜버 "우주를 줄게"와 함께하는 목성과 봄철 별자리 여행. (우천 시 2일차로 변경)</div>
       </div>
       <div class="timeline-item" style="border-bottom:none;background:linear-gradient(135deg,#fff8f7,#fff4f3);border-radius:14px;border:1.5px dashed #ffb3ab;margin-top:12px;padding:24px 20px">
         <div class="timeline-time" style="color:#ff6b5b">~01:00</div>
@@ -970,7 +970,7 @@
         <div class="prog-num">PROGRAM 02</div>
         <h3 class="prog-title">천체 관측 체험</h3>
         <p class="prog-desc">
-          전문가와 함께하는 별 관측 교육과 체험.<br>
+          천체관측 유튜버 "우주를 줄게"와 함께하는<br>목성과 봄철 별자리 여행.<br>
           어두워진 밤하늘이 그대로 교실이 됩니다.
         </p>
       </div>
@@ -1141,7 +1141,7 @@
       참가자 신청은 4월 22일 저녁 20시부터<br>
       <span style="font-size:15px;opacity:.75">신청자가 많을 경우 조기 마감될 수 있습니다.</span>
     </p>
-    <a href="#" class="btn-white" onclick="alert('참가 신청은 4월 22일 20시부터 시작합니다.');return false;">참가 신청하기 →</a>
+    <a href="booking.html" class="btn-white" onclick="return checkOpen(event)">참가 신청하기 →</a>
   </div>
 </section>
 
@@ -1191,5 +1191,28 @@
   });
 </script>
 
+
+<script>
+  function checkOpen(e) {
+    // 오픈 시각: 2026-04-22 20:00 KST
+    var openTime = new Date('2026-04-22T20:00:00+09:00').getTime();
+    var now = new Date().getTime();
+    if (now < openTime) {
+      e.preventDefault();
+      // 남은 시간 계산
+      var diff = openTime - now;
+      var days  = Math.floor(diff / (1000*60*60*24));
+      var hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+      var mins  = Math.floor((diff % (1000*60*60)) / (1000*60));
+      var msg = '참가 신청은 4월 22일 20시에 시작됩니다.';
+      if (days > 0)       msg += '\n\nD-' + days + ' ' + hours + '시간 ' + mins + '분 남았습니다.';
+      else if (hours > 0) msg += '\n\n' + hours + '시간 ' + mins + '분 후 오픈됩니다!';
+      else                msg += '\n\n' + mins + '분 후 오픈됩니다!';
+      alert(msg);
+      return false;
+    }
+    return true;
+  }
+</script>
 </body>
 </html>
