@@ -175,11 +175,37 @@
 
 <script>
 var SHEET_ID = '1ykZrc9LYqiSqHf-hrXhRSKpOWtLYXGzywWJAslnvPIU';
-var SHEET_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&sheet=설문지 응답 시트1';
 
-// 전화번호 정규화 (숫자만)
 function normalizePhone(p) {
   return (p || '').replace(/[^0-9]/g, '');
+}
+
+function parseCSV(text) {
+  var rows = [];
+  var lines = text.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
+    var cols = [];
+    var cur = '';
+    var inQ = false;
+    for (var j = 0; j < line.length; j++) {
+      var ch = line[j];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+    rows.push(cols);
+  }
+  return rows;
+}
+
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  var eb = document.getElementById('errorBox');
+  eb.innerHTML = msg;
+  eb.style.display = 'block';
 }
 
 function searchBooking() {
@@ -193,46 +219,49 @@ function searchBooking() {
   document.getElementById('result').style.display  = 'none';
   document.getElementById('errorBox').style.display = 'none';
 
-  // 구글 시트 gviz API (공개 뷰어 설정 필요)
-  var url = SHEET_URL;
-  var script = document.createElement('script');
-  window._gvizCallback = function(data) {
-    document.getElementById('loading').style.display = 'none';
-    document.body.removeChild(script);
+  // fetch로 CSV 가져와서 파싱
+  var csvUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv';
 
-    try {
-      var rows = data.table.rows;
+  fetch(csvUrl)
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.text();
+    })
+    .then(function(csv) {
+      document.getElementById('loading').style.display = 'none';
+
+      var rows = parseCSV(csv);
       var found = null;
 
-      for (var i = 0; i < rows.length; i++) {
-        var row = rows[i];
-        if (!row.c || !row.c[1] || !row.c[2]) continue;
-        var rName  = (row.c[1].v || '').trim();
-        var rPhone = normalizePhone(row.c[2].v || '');
+      for (var i = 1; i < rows.length; i++) { // 0행은 헤더
+        if (!rows[i] || rows[i].length < 3) continue;
+        var rName  = (rows[i][1] || '').trim();
+        var rPhone = normalizePhone(rows[i][2] || '');
         if (rName === name && rPhone === phone) {
-          found = row.c;
+          found = rows[i];
           break;
         }
       }
 
       if (!found) {
-        var eb = document.getElementById('errorBox');
-        eb.innerHTML = '❌ 예약 내역을 찾을 수 없습니다.<br><small>이름과 전화번호를 다시 확인해 주세요.</small>';
-        eb.style.display = 'block';
+        showError('❌ 예약 내역을 찾을 수 없습니다.<br><small>이름과 전화번호를 정확히 입력해 주세요.</small>');
         return;
       }
 
-      showResult(found);
+      showResultCSV(found);
+    })
+    .catch(function(e) {
+      showError('⚠️ 데이터를 불러올 수 없습니다.<br><small>' + e.message + '</small>');
+    });
+}
 
-    } catch(e) {
-      var eb = document.getElementById('errorBox');
-      eb.innerHTML = '⚠️ 데이터를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
-      eb.style.display = 'block';
-    }
-  };
+function showResultCSV(c) {
+  // CSV 배열: c[0]=타임스탬프 c[1]=이름 c[2]=연락처 c[3]=성인 c[4]=아동
+  var r = {};
+  var keys = ['ts','name','phone','adult','child','birth','region','agree1','childname','guardian','agree2','nick','han','site','car','friend','arrival','msg','filming'];
+  for (var i = 0; i < keys.length; i++) r[keys[i]] = (c[i] || '').replace(/^"|"$/g, '').trim() || '-';
 
-  script.src = url + '&callback=_gvizCallback';
-  document.body.appendChild(script);
+  renderResult(r);
 }
 
 function v(cell) { return cell && cell.v ? String(cell.v) : '-'; }
@@ -243,19 +272,19 @@ function showResult(c) {
   // c[10]=아동보호자동의 c[11]=카페닉네임 c[12]=희망반 c[13]=사이트 c[14]=차량
   // c[15]=지인 c[16]=도착시간 c[17]=하고싶은말 c[18]=촬영동의
 
-  var name    = v(c[1]);
-  var phone   = v(c[2]);
-  var adult   = v(c[3]);
-  var child   = v(c[4]);
-  var birth   = v(c[5]);
-  var region  = v(c[6]);
-  var cname   = v(c[8]);
-  var nick    = v(c[11]);
-  var han     = v(c[12]);
-  var site    = v(c[13]);
-  var car     = v(c[14]);
-  var friend  = v(c[15]);
-  var arrival = v(c[16]);
+  var r = {
+    name: v(c[1]), phone: v(c[2]), adult: v(c[3]), child: v(c[4]),
+    birth: v(c[5]), region: v(c[6]), childname: v(c[8]), nick: v(c[11]),
+    han: v(c[12]), site: v(c[13]), car: v(c[14]), friend: v(c[15]), arrival: v(c[16])
+  };
+  renderResult(r);
+}
+
+function renderResult(r) {
+  var name = r.name, phone = r.phone, adult = r.adult, child = r.child;
+  var birth = r.birth, region = r.region, cname = r.childname;
+  var nick = r.nick, han = r.han, site = r.site, car = r.car;
+  var friend = r.friend, arrival = r.arrival;
 
   document.getElementById('r-name').innerText  = name + ' 님';
   document.getElementById('r-nick').innerText  = '카페 닉네임: ' + nick;
