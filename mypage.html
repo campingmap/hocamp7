@@ -222,21 +222,26 @@ function searchBooking() {
   // fetch로 CSV 가져와서 파싱
   var csvUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv';
 
+  console.log('조회 시작:', csvUrl);
   fetch(csvUrl)
     .then(function(res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      console.log('응답 상태:', res.status, res.ok);
+      if (!res.ok) throw new Error('HTTP 오류: ' + res.status);
       return res.text();
     })
     .then(function(csv) {
+      console.log('CSV 수신 완료, 길이:', csv.length);
       document.getElementById('loading').style.display = 'none';
 
       var rows = parseCSV(csv);
+      console.log('총 행 수:', rows.length, '/ 검색:', name, phone);
       var found = null;
 
-      for (var i = 1; i < rows.length; i++) { // 0행은 헤더
+      for (var i = 1; i < rows.length; i++) {
         if (!rows[i] || rows[i].length < 3) continue;
         var rName  = (rows[i][1] || '').trim();
         var rPhone = normalizePhone(rows[i][2] || '');
+        console.log(i, rName, rPhone);
         if (rName === name && rPhone === phone) {
           found = rows[i];
           break;
@@ -244,14 +249,15 @@ function searchBooking() {
       }
 
       if (!found) {
-        showError('❌ 예약 내역을 찾을 수 없습니다.<br><small>이름과 전화번호를 정확히 입력해 주세요.</small>');
+        showError('❌ 예약 내역을 찾을 수 없습니다.<br><small>입력하신 이름과 전화번호(숫자만)를 확인해 주세요.</small>');
         return;
       }
 
       showResultCSV(found);
     })
     .catch(function(e) {
-      showError('⚠️ 데이터를 불러올 수 없습니다.<br><small>' + e.message + '</small>');
+      console.error('fetch 오류:', e);
+      showError('⚠️ 데이터를 불러올 수 없습니다.<br><small>' + e.message + '<br>F12 콘솔에서 오류를 확인해 주세요.</small>');
     });
 }
 
