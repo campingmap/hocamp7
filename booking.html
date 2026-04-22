@@ -555,16 +555,46 @@
     params.append('fvv', '1');
     params.append('pageHistory', '0,1');
 
-    fetch(formUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString()
-    }).then(function() {
-      console.log('구글폼 전송 완료');
-    }).catch(function(e) {
-      console.log('전송 오류(무시 가능):', e);
-    });
+    // 숨겨진 iframe에 실제 form submit으로 전송 (누락 방지)
+    var iframe = document.getElementById('gform-iframe');
+    var hiddenForm = document.getElementById('gform-hidden');
+
+    // 기존 필드 모두 제거
+    hiddenForm.innerHTML = '';
+
+    // 필드 추가 함수
+    function addField(name, value) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value || '';
+      hiddenForm.appendChild(input);
+    }
+
+    addField('entry.1912926423', p1data.name);
+    addField('entry.1239222796', p1data.phone);
+    addField('entry.1357739873', p1data.adult);
+    addField('entry.312724505',  p1data.child);
+    addField('entry.1815207744', p1data.childBirth);
+    addField('entry.1582856050', p1data.region);
+    addField('entry.1833005978', p1data.agree1);
+    addField('entry.453176144',  p1data.childName);
+    addField('entry.507413356',  p1data.guardianName);
+    addField('entry.580964737',  p1data.agree2);
+    addField('entry.196725166',  cafeNick);
+    addField('entry.970930860',  han);
+    addField('entry.407771982',  site);
+    vehicleSel.forEach(function(v) { addField('entry.633618288', v); });
+    addField('entry.1005991624', friendNick);
+    addField('entry.782972763',  arrivalTime);
+    addField('entry.710258770',  msg);
+    addField('entry.2000713890', filming);
+    addField('fvv', '1');
+    addField('pageHistory', '0,1');
+    addField('fbzx', '1730326244666889790');
+
+    hiddenForm.submit();
+    console.log('구글폼 제출 완료');
 
     // 요금 계산
     var fee = 180000;
@@ -611,5 +641,14 @@
 
 })();
 </script>
+
+<!-- 구글폼 전송용 숨겨진 iframe + form -->
+<iframe id="gform-iframe" name="gform-iframe" style="display:none"></iframe>
+<form id="gform-hidden"
+  action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSczoNd482OHsH9vuhyrHkFJpuFkpvvEX4gZHM9-fb2mmrJsPQ/formResponse"
+  method="POST"
+  target="gform-iframe"
+  style="display:none">
+</form>
 </body>
 </html>
