@@ -556,11 +556,9 @@
     params.append('pageHistory', '0,1');
 
     // 숨겨진 iframe에 실제 form submit으로 전송 (누락 방지)
-    var iframe = document.getElementById('gform-iframe');
     var hiddenForm = document.getElementById('gform-hidden');
-
-    // 기존 필드 모두 제거
-    hiddenForm.innerHTML = '';
+    if (!hiddenForm) { console.error('gform-hidden 없음'); return; }
+    while (hiddenForm.firstChild) { hiddenForm.removeChild(hiddenForm.firstChild); }
 
     // 필드 추가 함수
     function addField(name, value) {
@@ -592,9 +590,6 @@
     addField('fvv', '1');
     addField('pageHistory', '0,1');
     addField('fbzx', '1730326244666889790');
-
-    hiddenForm.submit();
-    console.log('구글폼 제출 완료');
 
     // 요금 계산
     var fee = 180000;
@@ -637,6 +632,12 @@
     document.getElementById('page2').style.display = 'none';
     document.getElementById('page3').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 구글폼 전송 — page3 전환 후 실행
+    setTimeout(function() {
+      try { hiddenForm.submit(); console.log('구글폼 제출 완료'); }
+      catch(e) { console.error('폼 제출 오류:', e); }
+    }, 300);
   };
 
 })();
