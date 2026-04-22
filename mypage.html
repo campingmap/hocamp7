@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>예약 확인 · hocamp to Ocean</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1720;--ink-soft:#3b4a57;--muted:#6b7b88;--line:#e6ebef;
+    --bg:#f6f9fb;--card:#fff;--ocean:#0aa3c4;--ocean-deep:#036b85;
+    --ocean-pale:#dff3f8;--coral:#ff6b5b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+  a{text-decoration:none;color:inherit}
+
+  nav{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+  .nav-inner{max-width:680px;margin:0 auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between}
+  .nav-logo{font-family:"Archivo Black",sans-serif;font-size:16px;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px}
+  .nav-dot{width:9px;height:9px;border-radius:50%;background:var(--ocean);box-shadow:0 0 0 3px var(--ocean-pale)}
+  .nav-back{font-size:13px;font-weight:600;color:var(--muted);transition:color .2s}
+  .nav-back:hover{color:var(--ocean)}
+
+  .wrap{max-width:680px;margin:0 auto;padding:40px 24px 80px}
+
+  /* 검색 카드 */
+  .search-card{background:#fff;border-radius:20px;border:1px solid var(--line);padding:36px 32px;box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:24px}
+  .search-title{font-family:"Archivo Black",sans-serif;font-size:22px;letter-spacing:-0.02em;color:var(--ink);margin-bottom:6px}
+  .search-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px}
+  .field input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;font-family:"Noto Sans KR",sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
+  .field input:focus{border-color:var(--ocean);box-shadow:0 0 0 3px rgba(10,163,196,.1)}
+  .btn-search{width:100%;padding:16px;border-radius:12px;background:var(--ink);color:#fff;font-family:"Archivo Black",sans-serif;font-size:16px;border:none;cursor:pointer;transition:all .25s;margin-top:8px}
+  .btn-search:hover{background:var(--ocean);transform:translateY(-1px)}
+
+  /* 로딩 */
+  .loading{text-align:center;padding:40px;color:var(--muted);font-size:15px;display:none}
+  .spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--ocean);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* 에러 */
+  .error-box{background:#fff5f5;border:1.5px solid #ffcdd2;border-radius:14px;padding:20px 24px;color:var(--coral);font-size:15px;font-weight:600;display:none;margin-bottom:20px}
+
+  /* 결과 카드 */
+  .result{display:none}
+  .result-header{background:linear-gradient(135deg,var(--ink) 0%,#1a3a4a 100%);border-radius:20px;padding:32px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden}
+  .result-header::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 0%,var(--ocean) 0%,transparent 60%);opacity:.25}
+  .result-header > *{position:relative}
+  .result-eyebrow{font-size:12px;letter-spacing:.15em;color:var(--ocean-pale);margin-bottom:8px;font-weight:700}
+  .result-name{font-family:"Archivo Black",sans-serif;font-size:28px;letter-spacing:-0.02em;margin-bottom:4px}
+  .result-nick{font-size:14px;color:rgba(255,255,255,.65)}
+  .result-badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.15);font-size:13px;font-weight:600}
+
+  .info-card{background:#fff;border-radius:16px;border:1px solid var(--line);overflow:hidden;margin-bottom:12px}
+  .info-card-title{padding:16px 20px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--muted);background:var(--bg)}
+  .info-row{display:flex;padding:14px 20px;border-bottom:1px solid var(--line)}
+  .info-row:last-child{border-bottom:none}
+  .info-label{font-size:13px;color:var(--muted);font-weight:600;min-width:130px;flex-shrink:0}
+  .info-value{font-size:14px;color:var(--ink);font-weight:500;line-height:1.5}
+
+  .fee-card{background:var(--ocean-pale);border:1.5px solid var(--ocean);border-radius:16px;padding:24px;margin-bottom:12px}
+  .fee-title{font-size:13px;font-weight:700;color:var(--ocean-deep);margin-bottom:14px;letter-spacing:.08em}
+  .fee-row{display:flex;justify-content:space-between;font-size:14px;color:var(--ink-soft);margin-bottom:8px}
+  .fee-total{display:flex;justify-content:space-between;padding-top:12px;margin-top:4px;border-top:1px solid var(--ocean);font-family:"Archivo Black",sans-serif;font-size:20px;color:var(--ocean-deep)}
+
+  .btn-modify{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border-radius:12px;background:#fff;border:1.5px solid var(--ocean);color:var(--ocean);font-weight:700;font-size:15px;cursor:pointer;transition:all .25s;margin-top:4px}
+  .btn-modify:hover{background:var(--ocean);color:#fff}
+
+  .notice-box{background:#fff;border-left:4px solid var(--coral);border-radius:12px;padding:16px 20px;font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:16px}
+  .notice-box strong{color:var(--coral)}
+
+  @media(max-width:480px){
+    .search-card{padding:24px 18px}
+    .info-label{min-width:100px}
+    .result-name{font-size:22px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo"><span class="nav-dot"></span>7th hocamp festival</div>
+    <a href="index.html" class="nav-back">← 메인으로</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- 검색 -->
+  <div class="search-card">
+    <div class="search-title">예약 확인</div>
+    <div class="search-sub">신청 시 입력한 이름과 전화번호로 예약 내역을 확인할 수 있습니다.</div>
+    <div class="field">
+      <label>대표자 이름</label>
+      <input type="text" id="searchName" placeholder="예) 홍길동" />
+    </div>
+    <div class="field">
+      <label>연락처</label>
+      <input type="tel" id="searchPhone" placeholder="예) 01012345678" />
+    </div>
+    <button class="btn-search" onclick="searchBooking()">예약 확인하기 →</button>
+  </div>
+
+  <!-- 로딩 -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    조회 중입니다...
+  </div>
+
+  <!-- 에러 -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- 결과 -->
+  <div class="result" id="result">
+
+    <div class="notice-box">
+      <strong>📌 안내</strong><br>
+      예약 내역 수정이 필요하시면 아래 구글폼 수정 버튼을 이용해 주세요.<br>
+      선정 결과는 신청 후 <strong>일주일 이내</strong> 네이버 카페 "호의로운 캠핑단"에 공개됩니다.
+    </div>
+
+    <div class="result-header">
+      <div class="result-eyebrow">🏕️ hocamp to Ocean · 예약 확인</div>
+      <div class="result-name" id="r-name"></div>
+      <div class="result-nick" id="r-nick"></div>
+      <div class="result-badge" id="r-class"></div>
+    </div>
+
+    <!-- 기본 정보 -->
+    <div class="info-card">
+      <div class="info-card-title">👤 대표자 정보</div>
+      <div class="info-row"><span class="info-label">이름</span><span class="info-value" id="r-name2"></span></div>
+      <div class="info-row"><span class="info-label">연락처</span><span class="info-value" id="r-phone"></span></div>
+      <div class="info-row"><span class="info-label">거주지역</span><span class="info-value" id="r-region"></span></div>
+    </div>
+
+    <!-- 인원 -->
+    <div class="info-card">
+      <div class="info-card-title">👨‍👩‍👧‍👦 참여 인원</div>
+      <div class="info-row"><span class="info-label">성인</span><span class="info-value" id="r-adult"></span></div>
+      <div class="info-row"><span class="info-label">아동</span><span class="info-value" id="r-child"></span></div>
+      <div class="info-row"><span class="info-label">아동 생년월일</span><span class="info-value" id="r-birthday"></span></div>
+      <div class="info-row"><span class="info-label">아동 성명</span><span class="info-value" id="r-childname"></span></div>
+    </div>
+
+    <!-- 캠핑 정보 -->
+    <div class="info-card">
+      <div class="info-card-title">🏕️ 캠핑 정보</div>
+      <div class="info-row"><span class="info-label">사이트</span><span class="info-value" id="r-site"></span></div>
+      <div class="info-row"><span class="info-label">차량</span><span class="info-value" id="r-car"></span></div>
+      <div class="info-row"><span class="info-label">희망 반</span><span class="info-value" id="r-class2"></span></div>
+      <div class="info-row"><span class="info-label">도착 예정</span><span class="info-value" id="r-arrival"></span></div>
+      <div class="info-row"><span class="info-label">지인 일행</span><span class="info-value" id="r-friend"></span></div>
+    </div>
+
+    <!-- 예상 요금 -->
+    <div class="fee-card">
+      <div class="fee-title">💰 예상 참가비</div>
+      <div id="r-fee-lines"></div>
+      <div class="fee-total"><span>총 예상 참가비</span><span id="r-fee-total"></span></div>
+    </div>
+
+    <!-- 수정 버튼 -->
+    <a id="btn-modify-link" href="#" target="_blank" class="btn-modify">
+      ✏️ 구글폼에서 내용 수정하기
+    </a>
+
+  </div>
+</div>
+
+<script>
+var SHEET_ID = '1ykZrc9LYqiSqHf-hrXhRSKpOWtLYXGzywWJAslnvPIU';
+var SHEET_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&sheet=설문지 응답 시트1';
+
+// 전화번호 정규화 (숫자만)
+function normalizePhone(p) {
+  return (p || '').replace(/[^0-9]/g, '');
+}
+
+function searchBooking() {
+  var name  = document.getElementById('searchName').value.trim();
+  var phone = normalizePhone(document.getElementById('searchPhone').value);
+
+  if (!name)  { alert('이름을 입력해 주세요.'); return; }
+  if (!phone) { alert('연락처를 입력해 주세요.'); return; }
+
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('result').style.display  = 'none';
+  document.getElementById('errorBox').style.display = 'none';
+
+  // 구글 시트 gviz API (공개 뷰어 설정 필요)
+  var url = SHEET_URL;
+  var script = document.createElement('script');
+  window._gvizCallback = function(data) {
+    document.getElementById('loading').style.display = 'none';
+    document.body.removeChild(script);
+
+    try {
+      var rows = data.table.rows;
+      var found = null;
+
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        if (!row.c || !row.c[1] || !row.c[2]) continue;
+        var rName  = (row.c[1].v || '').trim();
+        var rPhone = normalizePhone(row.c[2].v || '');
+        if (rName === name && rPhone === phone) {
+          found = row.c;
+          break;
+        }
+      }
+
+      if (!found) {
+        var eb = document.getElementById('errorBox');
+        eb.innerHTML = '❌ 예약 내역을 찾을 수 없습니다.<br><small>이름과 전화번호를 다시 확인해 주세요.</small>';
+        eb.style.display = 'block';
+        return;
+      }
+
+      showResult(found);
+
+    } catch(e) {
+      var eb = document.getElementById('errorBox');
+      eb.innerHTML = '⚠️ 데이터를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+      eb.style.display = 'block';
+    }
+  };
+
+  script.src = url + '&callback=_gvizCallback';
+  document.body.appendChild(script);
+}
+
+function v(cell) { return cell && cell.v ? String(cell.v) : '-'; }
+
+function showResult(c) {
+  // c[0]=타임스탬프 c[1]=이름 c[2]=연락처 c[3]=성인 c[4]=아동
+  // c[5]=생년월일 c[6]=지역 c[7]=개인정보동의 c[8]=아동성명 c[9]=법정대리인
+  // c[10]=아동보호자동의 c[11]=카페닉네임 c[12]=희망반 c[13]=사이트 c[14]=차량
+  // c[15]=지인 c[16]=도착시간 c[17]=하고싶은말 c[18]=촬영동의
+
+  var name    = v(c[1]);
+  var phone   = v(c[2]);
+  var adult   = v(c[3]);
+  var child   = v(c[4]);
+  var birth   = v(c[5]);
+  var region  = v(c[6]);
+  var cname   = v(c[8]);
+  var nick    = v(c[11]);
+  var han     = v(c[12]);
+  var site    = v(c[13]);
+  var car     = v(c[14]);
+  var friend  = v(c[15]);
+  var arrival = v(c[16]);
+
+  document.getElementById('r-name').innerText  = name + ' 님';
+  document.getElementById('r-nick').innerText  = '카페 닉네임: ' + nick;
+  document.getElementById('r-class').innerText = '🎪 ' + han;
+  document.getElementById('r-name2').innerText  = name;
+  document.getElementById('r-phone').innerText  = phone;
+  document.getElementById('r-region').innerText = region;
+  document.getElementById('r-adult').innerText  = adult + '명';
+  document.getElementById('r-child').innerText  = child + '명';
+  document.getElementById('r-birthday').innerText = birth;
+  document.getElementById('r-childname').innerText = cname;
+  document.getElementById('r-site').innerText   = site;
+  document.getElementById('r-car').innerText    = car;
+  document.getElementById('r-class2').innerText = han;
+  document.getElementById('r-arrival').innerText = arrival;
+  document.getElementById('r-friend').innerText = friend || '없음';
+
+  // 요금 계산
+  var fee = 180000;
+  var lines = ['기본 참가비: 180,000원'];
+
+  var adultNum = parseInt(adult) || 2;
+  var childNum = parseInt(child) || 0;
+
+  if (site.indexOf('백패킹') !== -1) {
+    fee -= 20000;
+    lines.push('백패킹 데크 사이트 할인: -20,000원');
+  } else if (site.indexOf('파랑새') !== -1) {
+    fee += 70000;
+    lines.push('파랑새 방갈로: +70,000원');
+  } else if (site.indexOf('트리하우스') !== -1 || site.indexOf('솔부엉이') !== -1) {
+    fee += 100000;
+    lines.push(site.split('(')[0].trim() + ': +100,000원');
+  }
+
+  if (adultNum >= 3) {
+    var ae = (adultNum - 2) * 20000;
+    fee += ae;
+    lines.push('성인 추가 ' + (adultNum-2) + '명: +' + ae.toLocaleString() + '원');
+  }
+  if (childNum >= 4) {
+    var ce = (childNum - 3) * 20000;
+    fee += ce;
+    lines.push('아동 추가 ' + (childNum-3) + '명: +' + ce.toLocaleString() + '원');
+  }
+  if (car && car.indexOf('차량 추가') !== -1) {
+    fee += 10000;
+    lines.push('차량 추가: +10,000원');
+  }
+  if (car && (car.indexOf('캠핑카') !== -1 || car.indexOf('카라반') !== -1 || car.indexOf('트레일러') !== -1)) {
+    fee += 10000;
+    lines.push('캠핑카/카라반/트레일러: +10,000원');
+  }
+
+  var feeLinesHtml = lines.map(function(l) {
+    return '<div class="fee-row"><span>' + l.split(':')[0] + '</span><span>' + (l.split(':')[1] || '') + '</span></div>';
+  }).join('');
+  document.getElementById('r-fee-lines').innerHTML = feeLinesHtml;
+  document.getElementById('r-fee-total').innerText = fee.toLocaleString() + '원';
+
+  // 구글폼 수정 링크 (prefill)
+  var base = 'https://docs.google.com/forms/d/e/1FAIpQLSczoNd482OHsH9vuhyrHkFJpuFkpvvEX4gZHM9-fb2mmrJsPQ/viewform?usp=pp_url';
+  base += '&entry.1912926423=' + encodeURIComponent(name);
+  base += '&entry.1239222796=' + encodeURIComponent(phone);
+  base += '&entry.1582856050=' + encodeURIComponent(region);
+  document.getElementById('btn-modify-link').href = base;
+
+  document.getElementById('result').style.display = 'block';
+}
+
+// 엔터키 검색
+document.addEventListener('DOMContentLoaded', function() {
+  ['searchName','searchPhone'].forEach(function(id) {
+    document.getElementById(id).addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') searchBooking();
+    });
+  });
+});
+</script>
+
+</body>
+</html>

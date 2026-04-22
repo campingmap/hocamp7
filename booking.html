@@ -408,7 +408,14 @@
       <div id="feeTotalBox" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-family:'Archivo Black',sans-serif;font-size:22px;color:var(--ocean)"></div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:center">
+      <div id="gform-link-wrap" style="margin-bottom:12px;display:none">
+        <a id="gform-link" href="#" target="_blank" class="btn-cafe" style="background:var(--coral)">
+          📋 구글폼에서 최종 제출하기 →
+        </a>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">팝업이 차단된 경우 위 버튼을 눌러 직접 제출해 주세요</p>
+      </div>
       <a href="https://cafe.naver.com/hocamp" target="_blank" class="btn-cafe">☕ 호의로운 캠핑단 카페 바로가기 →</a>
+      <a href="mypage.html" class="btn-home" style="background:var(--ocean-pale);border-color:var(--ocean);color:var(--ocean-deep)">🔍 예약 내역 확인하기</a>
       <a href="index.html" class="btn-home">← 메인 페이지로</a>
     </div>
   </div>
@@ -555,44 +562,29 @@
     params.append('fvv', '1');
     params.append('pageHistory', '0,1');
 
-    // 구글폼 직접 POST 전송 (새 탭)
-    var gformUrl = 'https://docs.google.com/forms/u/0/d/e/1FAIpQLSczoNd482OHsH9vuhyrHkFJpuFkpvvEX4gZHM9-fb2mmrJsPQ/formResponse';
-    var gform = document.createElement('form');
-    gform.method = 'POST';
-    gform.action = gformUrl;
-    gform.target = '_blank';
-    gform.style.display = 'none';
-    document.body.appendChild(gform);
+    // 구글폼 prefill URL로 이동 (가장 확실한 방법)
+    var base = 'https://docs.google.com/forms/d/e/1FAIpQLSczoNd482OHsH9vuhyrHkFJpuFkpvvEX4gZHM9-fb2mmrJsPQ/viewform';
+    var q = '?usp=pp_url';
+    q += '&entry.1912926423=' + encodeURIComponent(p1data.name);
+    q += '&entry.1239222796=' + encodeURIComponent(p1data.phone);
+    q += '&entry.1357739873=' + encodeURIComponent(p1data.adult.replace('명',''));
+    q += '&entry.312724505='  + encodeURIComponent(p1data.child.replace('명',''));
+    q += '&entry.1815207744=' + encodeURIComponent(p1data.childBirth || '');
+    q += '&entry.1582856050=' + encodeURIComponent(p1data.region);
+    q += '&entry.1833005978=' + encodeURIComponent(p1data.agree1);
+    q += '&entry.453176144='  + encodeURIComponent(p1data.childName || '없음');
+    q += '&entry.507413356='  + encodeURIComponent(p1data.guardianName || '없음');
+    q += '&entry.580964737='  + encodeURIComponent(p1data.agree2);
+    q += '&entry.196725166='  + encodeURIComponent(cafeNick);
+    q += '&entry.970930860='  + encodeURIComponent(han);
+    q += '&entry.407771982='  + encodeURIComponent(site);
+    vehicleSel.forEach(function(v) { q += '&entry.633618288=' + encodeURIComponent(v); });
+    q += '&entry.1005991624=' + encodeURIComponent(friendNick || '없음');
+    q += '&entry.782972763='  + encodeURIComponent(arrivalTime);
+    q += '&entry.710258770='  + encodeURIComponent(msg || '');
+    q += '&entry.2000713890=' + encodeURIComponent(filming);
 
-    function gf(name, value) {
-      var i = document.createElement('input');
-      i.type = 'hidden'; i.name = name; i.value = value || '';
-      gform.appendChild(i);
-    }
-
-    gf('entry.1912926423', p1data.name);
-    gf('entry.1239222796', p1data.phone);
-    gf('entry.1357739873', p1data.adult.replace('명',''));
-    gf('entry.312724505',  p1data.child.replace('명',''));
-    gf('entry.1815207744', p1data.childBirth);
-    gf('entry.1582856050', p1data.region);
-    gf('entry.1833005978', p1data.agree1);
-    gf('entry.453176144',  p1data.childName);
-    gf('entry.507413356',  p1data.guardianName);
-    gf('entry.580964737',  p1data.agree2);
-    gf('entry.196725166',  cafeNick);
-    gf('entry.970930860',  han);
-    gf('entry.407771982',  site);
-    vehicleSel.forEach(function(v) { gf('entry.633618288', v); });
-    gf('entry.1005991624', friendNick || '없음');
-    gf('entry.782972763',  arrivalTime);
-    gf('entry.710258770',  msg);
-    gf('entry.2000713890', filming);
-    gf('fvv', '1');
-    gf('pageHistory', '0,1');
-    gf('fbzx', '1730326244666889790');
-
-    // 요금 계산
+        // 요금 계산
     var fee = 180000;
     var feeLines = ['기본 참가비: 180,000원'];
 
@@ -634,11 +626,13 @@
     document.getElementById('page3').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // 구글폼 전송 — page3 전환 후 실행
+    // 구글폼 prefill URL 새 탭으로 열기 — page3 전환 후 실행
+    var fullUrl = base + q;
+    document.getElementById('gform-link').href = fullUrl;
+    document.getElementById('gform-link-wrap').style.display = 'block';
     setTimeout(function() {
-      try { gform.submit(); console.log('구글폼 제출 완료'); document.body.removeChild(gform); }
-      catch(e) { console.error('폼 제출 오류:', e); }
-    }, 300);
+      window.open(fullUrl, '_blank');
+    }, 500);
   };
 
 })();
